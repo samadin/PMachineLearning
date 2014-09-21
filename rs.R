@@ -12,7 +12,7 @@ inTrain     <- createDataPartition(SDATA$classe, p = 0.75, list = FALSE)
 training    <- SDATA[inTrain, ]
 testing     <- SDATA[-inTrain,]
 
-MdlFit      <- randomForest(classe ~ ., data = training, ntree = 100) 
+MdlFit      <- randomForest(classe ~ ., data = training, ntree = 250) 
 MdlPrd      <- predict(MdlFit,testing)
 CM          <- confusionMatrix(MdlPrd,testing$classe)
 CMTOT       <- CM$table

@@ -11,9 +11,11 @@ We present the development and application of a machine learning algorithm appli
 
 ## Data Processing and Model Development
 
-- We obtained a data set consisting of 159 variables along with a classification of the type of exercise performed. - - The data contained both categorical and continuous variables, as well as missing values.
+- We obtained a data set consisting of 159 variables along with a classification of the type of exercise performed. 
+- The data contained both categorical and continuous variables, as well as missing values. Columns were filtered accordingly, and the same transformation was performed for the test set.
 - Each observation was then randomly assigned to either a training subset or a testing subset (see Cross-Validation).
 - Using the training subset, our model was trained to predict the correct classification by implementing the built-in random forest algorithm.
+- Due to computational resource constraints, we customized our algorithm by limiting ntree=100 (the number of random trees produced). This was chosen by starting with ntree=20 and only using 10 variables for fits. We then gradually increased both counts until achieving desired results.
 - Prediction accuracy was assessed by repeated assignment and training procedures.
 - The algorithm was performed on the testing data set, and the predictions were verified through the coursera submission process.
 
@@ -54,9 +56,27 @@ CM          <- confusionMatrix(MdlPrd,testing$classe)
 
 ##Expected Out-of-sample Error
 
-- Summing the confusion matrices for each training iteration, and then dividing the sum of all diagonal entries by the sum of the entire matrix, results in a prediction of 0.005% out-of-sample error.
+- Summing the confusion matrices for each training iteration, and then dividing the sum of all diagonal entries by the sum of the entire matrix, results in a prediction of 0.006 out-of-sample error.
 - In reality, the out-of-sample error for the true testing data set is expected to be higher than our predicted value due to the bias introduced by using the testing subset in training.
 - The submission process revealed 100% accuracy in predicting the 20 observations of the true test data set.
+
+## Confusion matrix over all 16 iterations
+
+I am unsure of what 5 figures the course director may want... so here's a confusion matrix...
+
+```{r,echo=FALSE}
+carr <- c(22300,64,0,0,0,16,15088,84,0,0,1,32,12583,155,14,0,0,13,12696,33,3,0,0,13,14369)
+dim(carr) <- c(5,5)
+m<- t(carr)
+carr<-as.data.frame(t(carr))
+colnames(carr)<-c("A","B","C","D","E")
+rownames(carr)<-c("A","B","C","D","E")
+carr
+
+sprintf("ERROR = %1.3f",1-sum(diag(m)/sum(m)))
+```
+         
+Figure 1. Combined confusion matrix of 16 iterations of training. Interestingly, most errors appear to be a prediction of a lower letter (e.g. predicting A when true classification is B, B instead of C, etc) more frequently that the other way around (e.g C/D occurs more frequently than D/C).
 
 ##Conclusion
 

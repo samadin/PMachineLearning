@@ -65,9 +65,11 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <div id="data-processing-and-model-development" class="section level2">
 <h2>Data Processing and Model Development</h2>
 <ul>
-<li>We obtained a data set consisting of 159 variables along with a classification of the type of exercise performed. - - The data contained both categorical and continuous variables, as well as missing values.</li>
+<li>We obtained a data set consisting of 159 variables along with a classification of the type of exercise performed.</li>
+<li>The data contained both categorical and continuous variables, as well as missing values. Columns were filtered accordingly, and the same transformation was performed for the test set.</li>
 <li>Each observation was then randomly assigned to either a training subset or a testing subset (see Cross-Validation).</li>
 <li>Using the training subset, our model was trained to predict the correct classification by implementing the built-in random forest algorithm.</li>
+<li>Due to computational resource constraints, we customized our algorithm by limiting ntree=100 (the number of random trees produced). This was chosen by starting with ntree=20 and only using 10 variables for fits. We then gradually increased both counts until achieving desired results.</li>
 <li>Prediction accuracy was assessed by repeated assignment and training procedures.</li>
 <li>The algorithm was performed on the testing data set, and the predictions were verified through the coursera submission process.</li>
 </ul>
@@ -111,10 +113,22 @@ CM          &lt;- confusionMatrix(MdlPrd,testing$classe)</code></pre>
 <div id="expected-out-of-sample-error" class="section level2">
 <h2>Expected Out-of-sample Error</h2>
 <ul>
-<li>Summing the confusion matrices for each training iteration, and then dividing the sum of all diagonal entries by the sum of the entire matrix, results in a prediction of 0.005% out-of-sample error.</li>
+<li>Summing the confusion matrices for each training iteration, and then dividing the sum of all diagonal entries by the sum of the entire matrix, results in a prediction of 0.006 out-of-sample error.</li>
 <li>In reality, the out-of-sample error for the true testing data set is expected to be higher than our predicted value due to the bias introduced by using the testing subset in training.</li>
 <li>The submission process revealed 100% accuracy in predicting the 20 observations of the true test data set.</li>
 </ul>
+</div>
+<div id="confusion-matrix-over-all-16-iterations" class="section level2">
+<h2>Confusion matrix over all 16 iterations</h2>
+<p>I am unsure of what 5 figures the course director may want… so here’s a confusion matrix…</p>
+<pre><code>##       A     B     C     D     E
+## A 22300    64     0     0     0
+## B    16 15088    84     0     0
+## C     1    32 12583   155    14
+## D     0     0    13 12696    33
+## E     3     0     0    13 14369</code></pre>
+<pre><code>## [1] &quot;ERROR = 0.006&quot;</code></pre>
+<p>Figure 1. Combined confusion matrix of 16 iterations of training. Interestingly, most errors appear to be a prediction of a lower letter (e.g. predicting A when true classification is B, B instead of C, etc) more frequently that the other way around (e.g C/D occurs more frequently than D/C).</p>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
