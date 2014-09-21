@@ -1,22 +1,63 @@
 ---
-title: "PMLFINAL"
+title: "Predicting Excersize Technique Through Positional Data"
 author: "samadin"
 date: "Sunday, September 21, 2014"
 output: html_document
 ---
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+##Introduction
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+We present the development and application of a machine learning algorithm applied to data from accelerometers located on the belt, forearm, arm, and dumbell of 6 participants while they performed barbell lifts correctly and incorrectly in 5 different ways. Our goal was to build a model to accurately predict which of the 5 ways (classified as A,B,C,D,E) they performed the maneuver, provided only with a training data set. In this report, we outline the development and justification of our model, method of cross-validation, and how we arrived at an estimate of the expected out-of-sample error. In the spirit of literate statistics and reproducible data, we also include analysis code herein.
 
-```{r}
-summary(cars)
+## Data Processing and Model Development
+
+- We obtained a data set consisting of 159 variables along with a classification of the type of exercise performed. - - The data contained both categorical and continuous variables, as well as missing values.
+- Each observation was then randomly assigned to either a training subset or a testing subset (see Cross-Validation).
+- Using the training subset, our model was trained to predict the correct classification by implementing the built-in random forest algorithm.
+- Prediction accuracy was assessed by repeated assignment and training procedures.
+- The algorithm was performed on the testing data set, and the predictions were verified through the coursera submission process.
+
+```{r dprocess, message=FALSE, cache=TRUE}
+library(caret);library(stats);library(lattice);library(ggplot2);library(randomForest)
+set.seed(32343)
+
+### read in data, filter out columns with missing data, and first 6
+SDATA       <- read.csv("pml-training.csv")         
+SDATA       <- SDATA[,-(1:7)]
+SDATA       <- SDATA[ , apply(SDATA, 2, function(x) !any(is.na(x)))]
+SDATA       <- SDATA[ , SDATA[1,]!="" ]
 ```
 
-You can also embed plots, for example:
+##Model Justification: Why We Chose Random Forest
 
-```{r, echo=FALSE}
-plot(cars)
+- The presence of categorical data restricted the use of some algorithms.
+- Required long computational time, but very little development time as it is easily available as an R package.
+- Provides high accuracy in many cases.
+- Did not require preprocessing of data as PCA or other possible choices.
+
+##Cross Validation
+
+- Assignment into training (75% of observations) and testing (remaining 25%) subsets was performed by random sampling without replacement. 
+```{r, cache=TRUE}
+inTrain     <- createDataPartition(SDATA$classe, p = 0.75, list = FALSE)
+training    <- SDATA[ inTrain,]
+testing     <- SDATA[-inTrain,]
 ```
+- After training, model predictions were compared to the given classifications in the testing data set using a confusion matrix.
+```{r, cache=TRUE}
+MdlFit      <- randomForest(classe ~ ., data = training, ntree = 100) 
+MdlPrd      <- predict(MdlFit,testing)
+CM          <- confusionMatrix(MdlPrd,testing$classe)
+```
+- Out-of-sample error was for each iteration was recorded by the confusion matrix.
+- This process was repeated for 16 total random assignments, and thus 16 assessments of out-of sample errors.
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+##Expected Out-of-sample Error
+
+- Summing the confusion matrices for each training iteration, and then dividing the sum of all diagonal entries by the sum of the entire matrix, results in a prediction of 0.005% out-of-sample error.
+- In reality, the out-of-sample error for the true testing data set is expected to be higher than our predicted value due to the bias introduced by using the testing subset in training.
+- The submission process revealed 100% accuracy in predicting the 20 observations of the true test data set.
+
+##Conclusion
+
+We were able to achieve highly accurate predictions in this attempt. More efficient implementations may be able to be produced by further reducing the number of variables using principle component analysis or other techniques.
